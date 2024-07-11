@@ -4,3 +4,15 @@ Etcd:
   Hosts:
   - 116.198.246.212:3379
   Key: user.rpc
+
+Mysql:
+  DataSource: root:easy-chat@tcp(116.198.246.212:13306)/easy-chat?charset=utf8mb4
+
+Cache:
+  - Host: 116.198.246.212:16379
+    Type: node
+    Pass: easy-chat
+
+Jwt:
+  AccessSecret: imooc.com
+  AccessExpire: 8640000
