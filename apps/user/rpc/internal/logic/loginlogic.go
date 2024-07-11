@@ -46,11 +46,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
 	}
 
 	if !encrypt.ValidatePasswordHash(in.Password, userEntity.Password.String) {
-		return nil, ErrPhoneNotRegister
-	}
-
-	if userEntity != nil {
-		return nil, ErrPhoneIsRegister
+		return nil, ErrUserPwdError
 	}
 
 	// 生成token
