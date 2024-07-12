@@ -3,15 +3,16 @@ package logic
 import (
 	"context"
 	"easy-chat/apps/user/models"
-	"errors"
+	"easy-chat/pkg/xerr"
 
 	"easy-chat/apps/user/rpc/internal/svc"
 	"easy-chat/apps/user/rpc/user"
 	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-var ErrUserNotFound = errors.New("该用户不存在")
+var ErrUserNotFound = xerr.New(xerr.SERVER_COMMON_ERROR, "该用户不存在")
 
 type GetUserInfoLogic struct {
 	ctx    context.Context
@@ -33,9 +34,9 @@ func (l *GetUserInfoLogic) GetUserInfo(in *user.GetUserInfoReq) (*user.GetUserIn
 	userEntity, err := l.svcCtx.UsersModel.FindOne(l.ctx, in.Id)
 	if err != nil {
 		if errors.Is(err, models.ErrNotFound) {
-			return nil, ErrUserNotFound
+			return nil, errors.WithStack(ErrUserNotFound)
 		}
-		return nil, err
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find user by id err %v, req %v", err, in.Id)
 	}
 
 	var resp user.UserEntity

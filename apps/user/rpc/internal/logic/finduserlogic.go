@@ -3,11 +3,12 @@ package logic
 import (
 	"context"
 	"easy-chat/apps/user/models"
+	"easy-chat/pkg/xerr"
 	"github.com/jinzhu/copier"
 
 	"easy-chat/apps/user/rpc/internal/svc"
 	"easy-chat/apps/user/rpc/user"
-
+	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -45,8 +46,9 @@ func (l *FindUserLogic) FindUser(in *user.FindUserReq) (*user.FindUserResp, erro
 		userEntitys, err = l.svcCtx.UsersModel.ListByIds(l.ctx, in.Ids)
 	}
 
-	if err != nil {
-		return nil, err
+	if err != nil && !errors.Is(err, models.ErrNotFound) {
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find by phone or name or ids err %v, req %v",
+			err, *in)
 	}
 
 	var resp []*user.UserEntity
