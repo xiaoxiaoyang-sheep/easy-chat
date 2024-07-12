@@ -9,7 +9,7 @@ import (
 type ServiceContext struct {
 	Config config.Config
 
-	UsersModel models.UsersModel
+	models.UsersModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
