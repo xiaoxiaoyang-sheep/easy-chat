@@ -13,7 +13,7 @@ func GetJwtToken(secretKey string, iat, seconds int64, uid string) (string, erro
 	claims := make(jwt.MapClaims)
 	claims["exp"] = iat + seconds
 	claims["iat"] = iat
-	claims["identify"] = uid
+	claims[Identify] = uid
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = claims
