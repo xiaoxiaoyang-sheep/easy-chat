@@ -15,6 +15,7 @@ import (
 type Conn struct {
 	idleMu sync.Mutex
 	*websocket.Conn
+	Uid               string
 	s                 *Server
 	idle              time.Time
 	maxConnectionIdle time.Duration

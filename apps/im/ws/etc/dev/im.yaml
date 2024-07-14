@@ -3,3 +3,7 @@ ListenOn: 0.0.0.0:10090
   
 JwtAuth:
   AccessSecret: imooc.com
+
+Mongo:
+  Url: mongodb://root:easy-chat@116.198.246.212:47017
+  Db: easy-chat
