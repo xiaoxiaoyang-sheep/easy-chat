@@ -59,6 +59,7 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 
 	if !s.authentication.Auth(w, r) {
 		conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("不具备访问权限")))
+		conn.Close()
 		return
 	}
 
@@ -92,7 +93,7 @@ func (s *Server) handlerConn(conn *websocket.Conn) {
 
 		var message Message
 		if err = json.Unmarshal(msg, &message); err != nil {
-			s.Errorf("json unmarshal err &v, msg &v", err, string(msg))
+			s.Errorf("json unmarshal err %v, msg %v", err, string(msg))
 			s.Close(conn)
 			return
 		}

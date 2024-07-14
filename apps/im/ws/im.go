@@ -27,10 +27,12 @@ func main() {
 	if err := c.SetUp(); err != nil {
 		panic(err)
 	}
-	srv := websocket.NerServer(c.ListenOn)
+	ctx := svc.NewServiceContext(c)
+
+	srv := websocket.NerServer(c.ListenOn, websocket.WithServerAuthentication(handler.NewJwtAuth(
+		ctx)))
 	defer srv.Stop()
 
-	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(srv, ctx)
 
 	fmt.Println("start websocket server at ", c.ListenOn, "......")
