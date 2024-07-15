@@ -9,3 +9,15 @@ MsgChatTransfer:
   Topic: msgChatTransfer
   Offset: first
   Consumers: 1
+
+Redisx:
+  Host: 116.198.246.212:16379
+  Type: node
+  Pass: easy-chat
+
+Mongo:
+  Url: mongodb://root:easy-chat@116.198.246.212:47017
+  Db: easy-chat
+
+Ws:
+  Host: 127.0.0.1:10090

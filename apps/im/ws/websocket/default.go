@@ -11,6 +11,6 @@ import (
 )
 
 const (
-	defaultPatten            = "/ws"
+	defaultPattern           = "/ws"
 	defaultMaxConnectionIdle = time.Duration(math.MaxInt64)
 )

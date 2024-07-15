@@ -113,7 +113,7 @@ func (s *Server) handlerConn(conn *Conn) {
 		// 依据消息进行处理
 		switch message.FrameType {
 		case FramePing:
-			s.Send(&Message{FrameType: FramePing}, conn)
+			s.Send(&Message{FrameType: FramePing, FormId: conn.Uid}, conn)
 		case FrameData:
 			// 根据请求的method分发路由并执行
 			if handler, ok := s.routes[message.Method]; ok {

@@ -15,7 +15,7 @@ const (
 
 type Message struct {
 	FrameType FrameType   `json:"frameType"`
-	Method    string      `json:"method"`
+	Method    string      `json:"method,omitempty"`
 	FormId    string      `json:"formId"`
 	Data      interface{} `json:"data"`
 }

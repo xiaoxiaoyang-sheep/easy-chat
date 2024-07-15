@@ -18,7 +18,7 @@ type serverOption struct {
 func newServerOptions(opts ...ServerOptions) serverOption {
 	o := serverOption{
 		Authentication:    new(authentication),
-		patten:            defaultPatten,
+		patten:            defaultPattern,
 		maxConnectionIdle: defaultMaxConnectionIdle,
 	}
 
