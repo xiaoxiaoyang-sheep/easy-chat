@@ -28,7 +28,6 @@ func NewFriendListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Friend
 }
 
 func (l *FriendListLogic) FriendList(req *types.FriendListReq) (resp *types.FriendListResp, err error) {
-	// todo: add your logic here and delete this line
 
 	uid := ctxdata.GetUId(l.ctx)
 

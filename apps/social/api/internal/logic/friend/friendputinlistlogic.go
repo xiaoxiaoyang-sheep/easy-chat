@@ -25,7 +25,6 @@ func NewFriendPutInListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 }
 
 func (l *FriendPutInListLogic) FriendPutInList(req *types.FriendPutInListReq) (resp *types.FriendPutInListResp, err error) {
-	// todo: add your logic here and delete this line
 
 	return
 }

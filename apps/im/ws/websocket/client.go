@@ -59,7 +59,7 @@ func (c *client) Send(v interface{}) error {
 		return nil
 	}
 
-	// todo: 在增加一个重连发送
+	// 在增加一个重连发送
 	conn, err := c.dail()
 	if err != nil {
 		return err

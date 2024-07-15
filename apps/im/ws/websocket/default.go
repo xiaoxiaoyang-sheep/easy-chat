@@ -13,4 +13,6 @@ import (
 const (
 	defaultPattern           = "/ws"
 	defaultMaxConnectionIdle = time.Duration(math.MaxInt64)
+	defaultAckTimeout        = 30 * time.Second
+	defaultAck               = NoAck
 )

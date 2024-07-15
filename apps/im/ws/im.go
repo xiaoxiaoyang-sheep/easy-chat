@@ -30,6 +30,7 @@ func main() {
 
 	srv := websocket.NerServer(c.ListenOn,
 		websocket.WithServerAuthentication(handler.NewJwtAuth(ctx)),
+		websocket.WithServerAck(websocket.RigorAck),
 		//websocket.WithServerMaxConnectionIdle(10*time.Second),
 	)
 	defer srv.Stop()

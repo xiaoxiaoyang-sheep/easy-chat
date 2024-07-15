@@ -13,7 +13,26 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"sync"
+	"time"
 )
+
+type AckType int
+
+const (
+	NoAck AckType = iota
+	OnlyAck
+	RigorAck
+)
+
+func (t AckType) ToString() string {
+	switch t {
+	case OnlyAck:
+		return "OnlyAck"
+	case RigorAck:
+		return "RigorAck"
+	}
+	return "NoAck"
+}
 
 type Server struct {
 	sync.RWMutex
@@ -93,6 +112,13 @@ func (s *Server) handlerConn(conn *Conn) {
 	uids := s.GetUsers(conn)
 	conn.Uid = uids[0]
 
+	// 处理任务
+	go s.handlerWrite(conn)
+
+	if s.isAck(nil) {
+		go s.ReadAck(conn)
+	}
+
 	for {
 		// 获取请求消息
 		_, msg, err := conn.ReadMessage()
@@ -110,20 +136,138 @@ func (s *Server) handlerConn(conn *Conn) {
 			return
 		}
 
-		// 依据消息进行处理
-		switch message.FrameType {
-		case FramePing:
-			s.Send(&Message{FrameType: FramePing, FormId: conn.Uid}, conn)
-		case FrameData:
-			// 根据请求的method分发路由并执行
-			if handler, ok := s.routes[message.Method]; ok {
-				handler(s, conn, &message)
-			} else {
-				s.Send(&Message{FrameType: FrameData, Data: fmt.Sprintf("不存在执行的方法 %v, 请检查",
-					message.Method)}, conn)
-			}
+		// 是否需要ack验证
+		if s.isAck(&message) {
+			s.Info("conn message read ack msg %v", message)
+			conn.appendMsgMq((&message))
+		} else {
+			conn.message <- &message
+		}
+	}
+}
+
+func (s *Server) isAck(message *Message) bool {
+	if message == nil {
+		return s.opt.ack != NoAck
+	}
+	return s.opt.ack != NoAck && message.FrameType != FrameNoAck
+}
+
+// 读取消息的ack
+func (s *Server) ReadAck(conn *Conn) {
+	for {
+		select {
+		case <-conn.done:
+			s.Info("close message ack uid %v", conn.Uid)
+			return
+		default:
 		}
 
+		// 从队列中读取新的消息
+		conn.messageMu.Lock()
+		if len(conn.readMessage) == 0 {
+			conn.messageMu.Unlock()
+			// 增加睡眠
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+
+		// 读取第一条
+		message := conn.readMessage[0]
+
+		// 判断ack的方式
+		switch s.opt.ack {
+		case OnlyAck:
+			// 直接给客户端回复
+			s.Send(&Message{
+				FrameType: FrameAck,
+				Id:        message.Id,
+				AckSeq:    message.AckSeq + 1,
+			}, conn)
+			// 进行业务处理
+			// 把消息从队列中移除
+			conn.readMessage = conn.readMessage[1:]
+			conn.messageMu.Unlock()
+			conn.message <- message
+
+		case RigorAck:
+			// 先回
+			if message.AckSeq == 0 {
+				// 还未确认
+				conn.readMessage[0].AckSeq++
+				conn.readMessage[0].ackTime = time.Now()
+				s.Send(&Message{
+					FrameType: FrameAck,
+					Id:        message.Id,
+					AckSeq:    message.AckSeq,
+				}, conn)
+				s.Info("message ack RigorAck send mid %v, seq %v, time %v", message.Id,
+					message.AckSeq, message.ackTime)
+				conn.messageMu.Unlock()
+				continue
+			}
+
+			// 再验证
+			// 1. 客户端返回结果，再一次确认
+			// 得到客户端的序号
+			msgSeq := conn.readMessageSeq[message.Id]
+			if msgSeq.AckSeq > message.AckSeq {
+				// 确认
+				conn.readMessage = conn.readMessage[1:]
+				conn.messageMu.Unlock()
+				conn.message <- message
+				s.Info("message ack RigorAck sucess mid %v", message.Id)
+				continue
+			}
+
+			// 2. 客户端没有确认，考虑是否超过了ack的确认时间
+			val := s.opt.ackTimeout - time.Since(message.ackTime)
+			if !message.ackTime.IsZero() && val <= 0 {
+				//  2.2 超过 结束确认
+				delete(conn.readMessageSeq, message.Id)
+			}
+			//  2.1 未超过 重新发送
+			conn.messageMu.Unlock()
+			s.Send(&Message{
+				FrameType: FrameAck,
+				Id:        message.Id,
+				AckSeq:    message.AckSeq,
+			}, conn)
+			// 睡眠一定的时间
+			time.Sleep(3 * time.Second)
+		}
+
+	}
+}
+
+// 任务的处理
+func (s *Server) handlerWrite(conn *Conn) {
+	for {
+		select {
+		case <-conn.done:
+			// 通道关闭
+			return
+		case message := <-conn.message:
+			// 依据消息进行处理
+			switch message.FrameType {
+			case FramePing:
+				s.Send(&Message{FrameType: FramePing, FormId: conn.Uid}, conn)
+			case FrameData:
+				// 根据请求的method分发路由并执行
+				if handler, ok := s.routes[message.Method]; ok {
+					handler(s, conn, message)
+				} else {
+					s.Send(&Message{FrameType: FrameData, Data: fmt.Sprintf("不存在执行的方法 %v, 请检查",
+						message.Method)}, conn)
+				}
+			}
+
+			if s.isAck(message) {
+				conn.messageMu.Lock()
+				delete(conn.readMessageSeq, message.Id)
+				conn.messageMu.Unlock()
+			}
+		}
 	}
 }
 
