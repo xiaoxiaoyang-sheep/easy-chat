@@ -67,6 +67,9 @@ func (m *MsgChatTransfer) addChatLog(ctx context.Context, data *mq.TaskChatTrans
 	}
 
 	err := m.svc.ChatLogModel.Insert(ctx, &chatLog)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return m.svc.ConversationModel.UpdateMsg(ctx, &chatLog)
 }
