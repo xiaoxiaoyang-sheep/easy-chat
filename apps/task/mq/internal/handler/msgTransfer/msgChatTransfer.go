@@ -46,7 +46,7 @@ func (m *MsgChatTransfer) Consume(key, value string) error {
 
 	// 推送消息
 	return m.svc.WsClient.Send(websocket.Message{
-		FrameType: websocket.FrameData,
+		FrameType: websocket.FrameNoAck,
 		Method:    "push",
 		FormId:    constants.SYSTEM_ROOT_UID,
 		Data:      data,

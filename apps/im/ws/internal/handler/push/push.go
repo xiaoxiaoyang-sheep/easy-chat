@@ -10,6 +10,8 @@ import (
 	"easy-chat/apps/im/ws/websocket"
 	"easy-chat/apps/im/ws/ws"
 	"github.com/mitchellh/mapstructure"
+	"strconv"
+	"time"
 )
 
 func Push(svc *svc.ServiceContext) websocket.HandlerFunc {
@@ -29,7 +31,7 @@ func Push(svc *svc.ServiceContext) websocket.HandlerFunc {
 
 		srv.Info("recv push msg %v", data)
 
-		srv.Send(websocket.NewMessage(data.SendId, &ws.Chat{
+		message := websocket.NewMessage(data.SendId, &ws.Chat{
 			ConversationId: data.ConversationId,
 			ChatType:       data.ChatType,
 			Msg: ws.Msg{
@@ -37,6 +39,15 @@ func Push(svc *svc.ServiceContext) websocket.HandlerFunc {
 				Content: data.Content,
 			},
 			SendTime: data.SendTime,
-		}), rconn)
+		})
+
+		if srv.GetOptAct() == websocket.NoAck {
+			srv.Send(message, rconn)
+		} else {
+			message.AckSeq = -1
+			message.Id = strconv.FormatInt(time.Now().UnixMilli(), 10)
+			rconn.AppendMsgMq(message)
+		}
+
 	}
 }

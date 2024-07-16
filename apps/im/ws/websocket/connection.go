@@ -60,7 +60,7 @@ func (c *Conn) ReadMessage() (messageType int, p []byte, err error) {
 	return
 }
 
-func (c *Conn) appendMsgMq(msg *Message) {
+func (c *Conn) AppendMsgMq(msg *Message) {
 	c.messageMu.Lock()
 	defer c.messageMu.Unlock()
 
@@ -81,8 +81,9 @@ func (c *Conn) appendMsgMq(msg *Message) {
 		return
 	}
 
-	// 还没有进行ack确认，避免客户端重复发送多余的ack消息
-	if msg.FrameType == FrameAck {
+	// 还没有进行ack确认
+	// 在接收客户端消息时避免客户端重复发送多余的ack消息
+	if msg.FrameType == FrameAck && msg.FormId == c.Uid {
 		return
 	}
 
