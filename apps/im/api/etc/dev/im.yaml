@@ -1,0 +1,12 @@
+Name: im
+Host: 0.0.0.0
+Port: 8888
+
+ImRpc:
+  Etcd:
+    Hosts:
+      - 192.168.117.80:3379
+    Key: im.rpc
+
+JwtAuth:
+  AccessSecret: imooc.com
