@@ -16,6 +16,7 @@ type serverOption struct {
 
 	ack        AckType
 	ackTimeout time.Duration
+	concurrent int
 }
 
 func newServerOptions(opts ...ServerOptions) serverOption {
@@ -25,6 +26,7 @@ func newServerOptions(opts ...ServerOptions) serverOption {
 		maxConnectionIdle: defaultMaxConnectionIdle,
 		ackTimeout:        defaultAckTimeout,
 		ack:               defaultAck,
+		concurrent:        defaultConcurrent,
 	}
 
 	for _, opt := range opts {

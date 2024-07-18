@@ -10,6 +10,12 @@ MsgChatTransfer:
   Offset: first
   Consumers: 1
 
+SocialRpc:
+  Etcd:
+    Hosts:
+      - 116.198.246.212:3379
+    Key: social.rpc
+
 Redisx:
   Host: 116.198.246.212:16379
   Type: node

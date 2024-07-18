@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/threading"
 	"net/http"
 	"sync"
 	"time"
@@ -44,6 +45,7 @@ type Server struct {
 	connToUser     map[*Conn]string
 	userToConn     map[string]*Conn
 	upgrader       websocket.Upgrader
+	*threading.TaskRunner
 	logx.Logger
 }
 
@@ -60,8 +62,9 @@ func NerServer(addr string, opts ...ServerOptions) *Server {
 		connToUser: make(map[*Conn]string),
 		userToConn: make(map[string]*Conn),
 
-		upgrader: websocket.Upgrader{},
-		Logger:   logx.WithContext(context.Background()),
+		upgrader:   websocket.Upgrader{},
+		TaskRunner: threading.NewTaskRunner(opt.concurrent),
+		Logger:     logx.WithContext(context.Background()),
 	}
 }
 
@@ -124,7 +127,7 @@ func (s *Server) handlerConn(conn *Conn) {
 		// 获取请求消息
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			s.Errorf("websocket conn read message err &v", err)
+			s.Errorf("websocket conn read message err %v", err)
 			s.Close(conn)
 			return
 		}

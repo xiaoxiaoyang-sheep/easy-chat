@@ -28,25 +28,26 @@ func Chat(svc *svc.ServiceContext) websocket.HandlerFunc {
 
 		// 设置会话id
 		if data.ConversationId == "" {
-			data.ConversationId = wuid.CombineId(data.RecvId, conn.Uid)
+			switch data.ChatType {
+			case constants.SingleChatType:
+				data.ConversationId = wuid.CombineId(data.RecvId, conn.Uid)
+			case constants.GroupChatType:
+				data.ConversationId = data.RecvId
+			}
 		}
 
-		switch data.ChatType {
-		case constants.SingleChatType:
-			err := svc.MsgChatTransferClient.Push(&mq.TaskChatTransfer{
-				ConversationId: data.ConversationId,
-				ChatType:       data.ChatType,
-				SendId:         conn.Uid,
-				RecvId:         data.RecvId,
-				SendTime:       time.Now().UnixMilli(),
-				MType:          data.Msg.MType,
-				Content:        data.Msg.Content,
-			})
-			if err != nil {
-				srv.Send(websocket.NewErrMessage(err), conn)
-				return
-			}
-
+		err := svc.MsgChatTransferClient.Push(&mq.TaskChatTransfer{
+			ConversationId: data.ConversationId,
+			ChatType:       data.ChatType,
+			SendId:         conn.Uid,
+			RecvId:         data.RecvId,
+			SendTime:       time.Now().UnixMilli(),
+			MType:          data.Msg.MType,
+			Content:        data.Msg.Content,
+		})
+		if err != nil {
+			srv.Send(websocket.NewErrMessage(err), conn)
+			return
 		}
 	}
 }

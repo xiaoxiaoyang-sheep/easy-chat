@@ -30,6 +30,7 @@ type (
 		FindOne(ctx context.Context, id uint64) (*GroupMembers, error)
 		Update(ctx context.Context, data *GroupMembers) error
 		Delete(ctx context.Context, id uint64) error
+		ListByGroupId(ctx context.Context, grouoId string) ([]*GroupMembers ,error)
 	}
 
 	defaultGroupMembersModel struct {
@@ -98,6 +99,20 @@ func (m *defaultGroupMembersModel) Update(ctx context.Context, data *GroupMember
 		return conn.ExecCtx(ctx, query, data.GroupId, data.UserId, data.RoleLevel, data.JoinTime, data.JoinSource, data.InviterUid, data.OperatorUid, data.Id)
 	}, groupMembersIdKey)
 	return err
+}
+
+func (m *defaultGroupMembersModel) ListByGroupId(ctx context.Context,
+	grouoId string) ([]*GroupMembers ,error) {
+	query := fmt.Sprintf("select %s from %s where `group_id` = ?", groupMembersRows, m.table)
+
+	var resp []*GroupMembers
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, grouoId)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
 }
 
 func (m *defaultGroupMembersModel) formatPrimary(primary any) string {
