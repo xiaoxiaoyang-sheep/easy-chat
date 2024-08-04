@@ -4,7 +4,7 @@ tag='latest'
 
 container_name="easy-chat-social-rpc-test"
 
-pod_id="116.198.246.212"
+pod_id="120.26.209.19"
 
 docker ps | grep ${container_name} | xargs docker stop
 

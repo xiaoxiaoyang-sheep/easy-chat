@@ -1,6 +1,6 @@
 module easy-chat
 
-go 1.20
+go 1.22
 
 require (
 	github.com/edwingeng/wuid v1.0.0

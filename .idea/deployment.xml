@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="116.198.246.212" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="120.26.209.19"
+    remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="116.198.246.212">
+      <paths name="120.26.209.19">
         <serverdata>
           <mappings>
             <mapping deploy="/easy-chat" local="$PROJECT_DIR$" web="/" />

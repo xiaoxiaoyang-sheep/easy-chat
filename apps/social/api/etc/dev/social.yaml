@@ -5,13 +5,13 @@ Port: 8881
 SocialRpc:
   Etcd:
     Hosts:
-      - 116.198.246.212:3379
+      - 120.26.209.19:3379
     Key: social.rpc
 
 UserRpc:
   Etcd:
     Hosts:
-      - 116.198.246.212:3379
+      - 120.26.209.19:3379
     Key: user.rpc
 
 JwtAuth:

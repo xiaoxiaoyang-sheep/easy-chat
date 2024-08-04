@@ -1,14 +1,14 @@
 Name: im.ws
 ListenOn: 0.0.0.0:10090
-  
+
 JwtAuth:
   AccessSecret: imooc.com
 
 Mongo:
-  Url: mongodb://root:easy-chat@116.198.246.212:47017
+  Url: mongodb://root:easy-chat@120.26.209.19:47017
   Db: easy-chat
 
 MsgChatTransfer:
   Topic: msgChatTransfer
   Addrs:
-    - 116.198.246.212:9092
+    - 120.26.209.19:9092
